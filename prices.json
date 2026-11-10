@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-10T15:56:06+08:00",
+  "updated": "2026-11-10T16:29:45+08:00",
   "assets": [
     {
       "id": "qqq",
@@ -20,7 +20,7 @@
       "label": "NQ 期货 · 纳指100",
       "currency": "",
       "decimals": 2,
-      "price": 27959.78,
+      "price": 27957.72,
       "high": null,
       "highLabel": "",
       "highDate": "",
@@ -34,14 +34,14 @@
       "label": "VIX · 恐慌指数",
       "currency": "",
       "decimals": 2,
-      "price": 19.93,
+      "price": 19.8,
       "high": null,
       "highLabel": "",
       "highDate": "",
       "ytdBase": null,
       "iopv": null,
       "asOf": "实时 (新浪)",
-      "changePct": -22.24
+      "changePct": -0.65
     },
     {
       "id": "159501",
