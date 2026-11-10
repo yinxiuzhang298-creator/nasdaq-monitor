@@ -146,5 +146,3 @@ def update_json():
 
 if __name__ == "__main__":
     update_json()
-        print("等待 5 分钟后进行下一次自动更新...\n")
-        time.sleep(300)
