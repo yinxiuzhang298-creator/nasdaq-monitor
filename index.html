@@ -87,6 +87,19 @@
   .result-line { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-top: 1px solid #21262d; font-size: 0.82rem; }
   .result-line .label { color: #8b949e; }
   .result-line .value { font-weight: 700; font-size: 1.05rem; }
+  /* 手机端适配 */
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .grid { 
+      grid-template-columns: repeat(2, minmax(0, 1fr)); /* 强制变成 2x2 网格 */
+      gap: 10px; 
+    }
+    .card { padding: 12px; }
+    .card-value { font-size: 1.3rem; }
+    .input-row { flex-direction: column; }
+    .ticker-bar { flex-wrap: wrap; gap: 12px; }
+    .ticker-divider { display: none; }
+  }
 </style>
 </head>
 <body>
