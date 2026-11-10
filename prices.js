@@ -1,5 +1,5 @@
 window.LATEST_PRICES = {
-  "updated": "2026-11-10T15:46:34+08:00",
+  "updated": "2026-11-10T15:56:06+08:00",
   "assets": [
     {
       "id": "qqq",
@@ -20,14 +20,14 @@ window.LATEST_PRICES = {
       "label": "NQ 期货 · 纳指100",
       "currency": "",
       "decimals": 2,
-      "price": 28005.5,
+      "price": 27959.78,
       "high": null,
       "highLabel": "",
       "highDate": "",
       "ytdBase": null,
       "iopv": null,
       "asOf": "实时 (新浪)",
-      "changePct": -0.03
+      "changePct": -0.2
     },
     {
       "id": "vix",
