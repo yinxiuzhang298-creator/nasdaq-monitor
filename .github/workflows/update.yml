@@ -29,3 +29,4 @@ jobs:
           # 如果有更新才提交，没有就跳过
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update prices" && git push)
 # force active
+pip install yfinance
