@@ -1,0 +1,89 @@
+window.LATEST_PRICES = {
+  "updated": "2026-11-10T15:46:34+08:00",
+  "assets": [
+    {
+      "id": "qqq",
+      "label": "QQQ · 纳斯达克100 ETF",
+      "currency": "$",
+      "decimals": 2,
+      "price": 679.35,
+      "high": 759.66,
+      "highLabel": "历史收盘高点",
+      "highDate": "",
+      "ytdBase": 614.0,
+      "iopv": null,
+      "asOf": "实时 (新浪)",
+      "changePct": 3.54
+    },
+    {
+      "id": "nq",
+      "label": "NQ 期货 · 纳指100",
+      "currency": "",
+      "decimals": 2,
+      "price": 28005.5,
+      "high": null,
+      "highLabel": "",
+      "highDate": "",
+      "ytdBase": null,
+      "iopv": null,
+      "asOf": "实时 (新浪)",
+      "changePct": -0.03
+    },
+    {
+      "id": "vix",
+      "label": "VIX · 恐慌指数",
+      "currency": "",
+      "decimals": 2,
+      "price": 19.93,
+      "high": null,
+      "highLabel": "",
+      "highDate": "",
+      "ytdBase": null,
+      "iopv": null,
+      "asOf": "实时 (新浪)",
+      "changePct": -22.24
+    },
+    {
+      "id": "159501",
+      "label": "159501 · 嘉实纳指ETF",
+      "currency": "¥",
+      "decimals": 3,
+      "price": 2.11,
+      "high": 2.255,
+      "highLabel": "10月高点",
+      "highDate": "",
+      "ytdBase": 1.799,
+      "iopv": 1.7541,
+      "asOf": "实时 (腾讯)",
+      "changePct": 2.68
+    },
+    {
+      "id": "159659",
+      "label": "159659 · 招商纳指ETF",
+      "currency": "¥",
+      "decimals": 3,
+      "price": 2.344,
+      "high": 2.529,
+      "highLabel": "修正高点",
+      "highDate": "2026-10-12",
+      "ytdBase": 1.92,
+      "iopv": 2.0191,
+      "asOf": "实时 (腾讯)",
+      "changePct": 3.81
+    },
+    {
+      "id": "159696",
+      "label": "159696 · 易方达纳指ETF",
+      "currency": "¥",
+      "decimals": 3,
+      "price": 2.049,
+      "high": 2.26,
+      "highLabel": "10月高点",
+      "highDate": "",
+      "ytdBase": 1.692,
+      "iopv": 1.7391,
+      "asOf": "实时 (腾讯)",
+      "changePct": 3.54
+    }
+  ]
+};
