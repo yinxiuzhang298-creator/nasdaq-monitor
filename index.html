@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纳指ETF回撤 · 溢价 · 监控</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0d1117; color: #e6edf3; padding: 24px; min-height: 100vh;
+  }
+  h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; color: #f0f6fc; }
+  .subtitle { font-size: 0.8rem; color: #8b949e; margin-bottom: 14px; }
+  
+  /* 状态栏 */
+  .status-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    font-size: 0.75rem; margin-bottom: 16px; padding: 10px 14px;
+    border-radius: 8px; border: 1px solid #30363d; background: #161b22;
+  }
+  .status-ok { color: #3fb950; border-color: rgba(63,185,80,0.35); background: rgba(63,185,80,0.07); }
+  .status-warn { color: #d29922; border-color: rgba(210,153,34,0.35); background: rgba(210,153,34,0.07); }
+  .status-bar .spacer { flex: 1; }
+  .refresh-btn {
+    background: #21262d; border: 1px solid #30363d; color: #e6edf3;
+    border-radius: 6px; padding: 4px 11px; font-size: 0.75rem; cursor: pointer;
+  }
+  .refresh-btn:hover { background: #30363d; }
+
+  /* 顶部期货与VIX行情条 */
+  .ticker-bar {
+    display: flex; align-items: center; gap: 24px;
+    background: #161b22; border: 1px solid #30363d;
+    padding: 12px 20px; border-radius: 10px; margin-bottom: 20px;
+  }
+  .ticker-item { display: flex; align-items: center; gap: 12px; }
+  .ticker-label { font-size: 0.8rem; color: #8b949e; font-weight: 600; text-transform: uppercase; }
+  .ticker-price { font-size: 1.1rem; font-weight: 700; color: #f0f6fc; }
+  .ticker-divider { width: 1px; height: 24px; background: #30363d; }
+
+  /* 核心4卡片布局（强制一行4列，屏幕太小自动换行） */
+  .grid {
+    display: grid; 
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px; margin-bottom: 24px;
+  }
+  @media (max-width: 1200px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .card-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; margin-bottom: 8px; }
+  .card-value { font-size: 1.5rem; font-weight: 700; color: #f0f6fc; }
+  .card-detail { font-size: 0.78rem; color: #8b949e; margin-top: 6px; line-height: 1.55; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 0.75rem; font-weight: 600; line-height: 1.4; }
+  
+  /* 颜色 */
+  .dd-mild { background: rgba(248,81,73,0.15); color: #f85149; }
+  .dd-moderate { background: rgba(210,153,34,0.15); color: #d29922; }
+  .dd-severe { background: rgba(248,81,73,0.3); color: #ff7b72; }
+  .premium-high { background: rgba(248,81,73,0.25); color: #ff7b72; }
+  .premium-mid { background: rgba(210,153,34,0.2); color: #d29922; }
+  .premium-low { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .premium-na { background: rgba(139,148,158,0.1); color: #8b949e; }
+  .ytd-positive { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .ytd-negative { background: rgba(248,81,73,0.15); color: #f85149; }
+
+  /* 计算器区域 */
+  .calc-section { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .calc-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 12px; color: #f0f6fc; }
+  .input-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+  .input-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 110px; }
+  .input-group label { font-size: 0.7rem; color: #8b949e; }
+  .input-group input, .input-group select {
+    background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+    padding: 7px 9px; color: #e6edf3; font-size: 0.88rem; outline: none;
+  }
+  .input-group input:focus, .input-group select:focus { border-color: #58a6ff; }
+  .result-line { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-top: 1px solid #21262d; font-size: 0.82rem; }
+  .result-line .label { color: #8b949e; }
+  .result-line .value { font-weight: 700; font-size: 1.05rem; }
+</style>
+</head>
+<body>
+
+<h1>纳指ETF回撤 · 溢价 · 监控</h1>
+<p class="subtitle">实时数据由本地脚本自动更新</p>
+
+<!-- 状态栏 -->
+<div class="status-bar" id="statusBar">
+  <span id="statusText">正在加载 prices.js …</span>
+  <span class="spacer"></span>
+  <span id="nextRefresh" style="color:#484f58;font-size:0.72rem;"></span>
+  <button class="refresh-btn" id="refreshBtn">立即刷新</button>
+</div>
+
+<!-- 顶部 NQ 与 VIX 行情条 -->
+<div class="ticker-bar" id="tickerBar">
+  <!-- 由 JS 动态渲染 -->
+</div>
+
+<!-- 核心 4 卡片区 -->
+<div class="grid" id="cards"></div>
+
+<!-- 回撤 + YTD 计算器 -->
+<div class="calc-section">
+  <div class="calc-title">📉 回撤与YTD计算器</div>
+  <div class="input-row">
+    <div class="input-group"><label>品种</label><select id="dd-select"></select></div>
+    <div class="input-group"><label>历史高点</label><input type="number" id="dd-high" step="0.001"></div>
+    <div class="input-group"><label>当前价格</label><input type="number" id="dd-current" step="0.001"></div>
+    <div class="input-group"><label>年初价格 (YTD基准)</label><input type="number" id="dd-ytd-base" step="0.001"></div>
+  </div>
+  <div class="result-line"><span class="label">从高点回撤</span><span class="value" id="dd-output" style="font-size:1.2rem;font-weight:800;">—</span></div>
+  <div class="result-line"><span class="label">年初至今涨幅 (YTD)</span><span class="value" id="ytd-output" style="font-size:1.2rem;font-weight:800;">—</span></div>
+</div>
+
+<!-- 溢价率计算器 -->
+<div class="calc-section">
+  <div class="calc-title">💹 溢价率计算器（国内ETF）</div>
+  <div class="input-row">
+    <div class="input-group"><label>品种</label><select id="pm-select"></select></div>
+    <div class="input-group"><label>场内价格 (CNY)</label><input type="number" id="pm-price" step="0.001"></div>
+    <div class="input-group"><label>IOPV (参考净值)</label><input type="number" id="pm-iopv" step="0.001"></div>
+  </div>
+  <div class="result-line"><span class="label">溢价率</span><span class="value" id="pm-output" style="font-size:1.2rem;font-weight:800;">—</span></div>
+</div>
+
+<script>
+  let DATA = { assets: [] };
+  let countdown = 60;
+
+  function num(v) { const n = parseFloat(v); return isFinite(n) ? n : null; }
+  function fmtPct(v, signed) {
+    if (v === null || !isFinite(v)) return "—";
+    const s = signed && v > 0 ? "+" : "";
+    return s + v.toFixed(2) + "%";
+  }
+  function fmtPrice(asset) {
+    const n = num(asset.price);
+    if (n === null) return "—";
+    return (asset.currency || "") + n.toFixed(asset.decimals ?? 2);
+  }
+  function ddClass(v) { if (v === null) return ""; const a = Math.abs(v); if (a >= 20) return "dd-severe"; if (a >= 10) return "dd-moderate"; return "dd-mild"; }
+  function premiumClass(v) { if (v === null) return "premium-na"; if (v >= 10) return "premium-high"; if (v >= 5) return "premium-mid"; return "premium-low"; }
+  function ytdClass(v) { if (v === null) return "premium-na"; return v >= 0 ? "ytd-positive" : "ytd-negative"; }
+
+  function calcAsset(a) {
+    const price = num(a.price), high = num(a.high), base = num(a.ytdBase), iopv = num(a.iopv);
+    return {
+      drawdown: (price !== null && high !== null && high > 0) ? ((price - high) / high) * 100 : null,
+      ytd: (price !== null && base !== null && base > 0) ? ((price - base) / base) * 100 : null,
+      premium: (price !== null && iopv !== null && iopv > 0) ? ((price - iopv) / iopv) * 100 : null
+    };
+  }
+
+  // 渲染顶部 NQ 和 VIX
+  function renderTicker() {
+    const tickerIds = ["nq", "vix"];
+    const tickerAssets = DATA.assets.filter(a => tickerIds.includes(a.id));
+    
+    const html = tickerAssets.map(a => {
+      const pct = Number(a.changePct) || 0;
+      const cls = pct > 0 ? "ytd-positive" : (pct < 0 ? "ytd-negative" : "premium-na");
+      const sign = pct > 0 ? "+" : "";
+      const labelMap = { "nq": "NQ 期货 (纳指100)", "vix": "VIX (恐慌指数)" };
+      return `
+        <div class="ticker-item">
+          <span class="ticker-label">${labelMap[a.id] || a.label}</span>
+          <span class="ticker-price">${fmtPrice(a)}</span>
+          <span class="badge ${cls}">${sign}${pct.toFixed(2)}%</span>
+        </div>
+      `;
+    }).join('<div class="ticker-divider"></div>');
+
+    document.getElementById("tickerBar").innerHTML = html;
+  }
+
+  // 渲染核心4卡片
+  function renderCards() {
+    const coreIds = ["qqq", "159501", "159659", "159696"];
+    const coreAssets = DATA.assets.filter(a => coreIds.includes(a.id));
+
+    const grid = document.getElementById("cards");
+    grid.innerHTML = coreAssets.map(a => {
+      const c = calcAsset(a);
+      const lines = [];
+      if (a.asOf) lines.push(a.asOf);
+      
+      let highLine = a.highLabel ? (a.highLabel + " " + (a.currency || "") + Number(a.high).toFixed(a.decimals ?? 2)) : "";
+      if (highLine && a.highDate) highLine += " (" + a.highDate + ")";
+      if (highLine && a.high) lines.push(highLine);
+
+      if (a.iopv !== null && a.iopv !== undefined) {
+        lines.push("IOPV " + (a.currency || "") + Number(a.iopv).toFixed(a.decimals ?? 3));
+      }
+
+      let row1 = "";
+      if (a.changePct !== undefined && a.changePct !== null) {
+        const pct = Number(a.changePct);
+        if (!isNaN(pct)) {
+          const cls = pct > 0 ? "ytd-positive" : (pct < 0 ? "ytd-negative" : "premium-na");
+          const sign = pct > 0 ? "+" : "";
+          row1 += `<span class="badge ${cls}">今日 ${sign}${pct.toFixed(2)}%</span>`;
+        }
+      }
+      
+      if (c.drawdown !== null) {
+        const label = c.drawdown >= 0 ? "高于高点 " : "回撤 ";
+        row1 += `<span class="badge ${c.drawdown >= 0 ? "ytd-positive" : ddClass(c.drawdown)}">${label}${fmtPct(c.drawdown, true)}</span>`;
+      }
+      if (c.premium !== null) {
+        row1 += `<span class="badge ${premiumClass(c.premium)}">溢价 ${fmtPct(c.premium)}</span>`;
+      }
+      
+      const row2 = c.ytd !== null ? `<span class="badge ${ytdClass(c.ytd)}">YTD ${fmtPct(c.ytd, true)}</span>` : "";
+
+      return `<div class="card">
+        <div class="card-label">${a.label}</div>
+        <div class="card-value">${fmtPrice(a)}</div>
+        <div class="card-detail">${lines.join("<br>")}</div>
+        <div class="badge-row">${row1}${row2 ? "<br>" + row2 : ""}</div>
+      </div>`;
+    }).join("");
+  }
+
+  function fillSelects() {
+    const ddSel = document.getElementById("dd-select");
+    const pmSel = document.getElementById("pm-select");
+    const prevDD = ddSel.value, prevPM = pmSel.value;
+
+    // 只显示有历史高点和YTD基准的
+    const ddAssets = DATA.assets.filter(a => num(a.high) && num(a.ytdBase));
+    ddSel.innerHTML = ddAssets.map(a => `<option value="${a.id}">${a.label}</option>`).join("");
+    
+    const pmAssets = DATA.assets.filter(a => a.iopv !== null && a.iopv !== undefined);
+    pmSel.innerHTML = pmAssets.map(a => `<option value="${a.id}">${a.label}</option>`).join("");
+
+    if (prevDD && ddAssets.some(a => a.id === prevDD)) ddSel.value = prevDD;
+    if (prevPM && pmAssets.some(a => a.id === prevPM)) pmSel.value = prevPM;
+  }
+
+  function getAsset(id) { return DATA.assets.find(a => a.id === id); }
+
+  function fillDDCalc() {
+    const a = getAsset(document.getElementById("dd-select").value);
+    if (!a) return;
+    document.getElementById("dd-high").value = a.high;
+    document.getElementById("dd-current").value = a.price;
+    document.getElementById("dd-ytd-base").value = a.ytdBase;
+    calcDrawdownAndYTD();
+  }
+
+  function calcDrawdownAndYTD() {
+    const high = num(document.getElementById("dd-high").value);
+    const current = num(document.getElementById("dd-current").value);
+    const ytdBase = num(document.getElementById("dd-ytd-base").value);
+    const ddEl = document.getElementById("dd-output");
+    const ytdEl = document.getElementById("ytd-output");
+
+    if (high === null || current === null || high <= 0) {
+      ddEl.textContent = "—"; ddEl.style.color = "#e6edf3";
+    } else {
+      const dd = ((current - high) / high) * 100;
+      ddEl.textContent = fmtPct(dd, true);
+      ddEl.style.color = dd >= 0 ? "#3fb950" : dd > -10 ? "#f85149" : dd > -20 ? "#d29922" : "#ff7b72";
+    }
+    if (ytdBase === null || current === null || ytdBase <= 0) {
+      ytdEl.textContent = "—"; ytdEl.style.color = "#e6edf3";
+    } else {
+      const ytd = ((current - ytdBase) / ytdBase) * 100;
+      ytdEl.textContent = fmtPct(ytd, true);
+      ytdEl.style.color = ytd >= 0 ? "#3fb950" : "#f85149";
+    }
+  }
+
+  function fillPMCalc() {
+    const a = getAsset(document.getElementById("pm-select").value);
+    if (!a) return;
+    document.getElementById("pm-price").value = a.price;
+    document.getElementById("pm-iopv").value = a.iopv;
+    calcPremium();
+  }
+
+  function calcPremium() {
+    const price = num(document.getElementById("pm-price").value);
+    const iopv = num(document.getElementById("pm-iopv").value);
+    const el = document.getElementById("pm-output");
+    if (price === null || iopv === null || iopv <= 0) {
+      el.textContent = "—"; el.style.color = "#e6edf3"; return;
+    }
+    const pm = ((price - iopv) / iopv) * 100;
+    el.textContent = fmtPct(pm);
+    el.style.color = pm >= 10 ? "#ff7b72" : pm >= 5 ? "#d29922" : pm >= 0 ? "#3fb950" : "#8b949e";
+  }
+
+  function isEditingCalc() {
+    const a = document.activeElement;
+    return !!(a && a.closest && a.closest(".calc-section"));
+  }
+
+  function setStatus(ok, updatedISO, errMsg) {
+    const bar = document.getElementById("statusBar");
+    const text = document.getElementById("statusText");
+    bar.classList.remove("status-ok", "status-warn");
+    if (ok) {
+      bar.classList.add("status-ok");
+      const t = updatedISO ? new Date(updatedISO) : new Date();
+      const ts = isNaN(t.getTime()) ? updatedISO : t.toLocaleString("zh-CN", { hour12: false });
+      text.textContent = `✓ 数据同步成功 · 更新时间：${ts}`;
+    } else {
+      bar.classList.add("status-warn");
+      text.textContent = `⚠ 未能加载 prices.js（${errMsg || "未知错误"}），请确认 auto_update.py 是否正在运行。`;
+    }
+  }
+
+  function updateCountdown() {
+    document.getElementById("nextRefresh").textContent = `下次刷新 ${countdown}s`;
+  }
+
+  function loadPrices() {
+    const oldScript = document.getElementById("dynamic-data");
+    if (oldScript) oldScript.remove();
+    
+    const script = document.createElement("script");
+    script.src = "prices.js?t=" + Date.now();
+    script.id = "dynamic-data";
+    
+    script.onload = function() {
+      if (window.LATEST_PRICES) {
+        DATA = window.LATEST_PRICES;
+        setStatus(true, DATA.updated);
+        
+        renderTicker();
+        renderCards();
+        fillSelects();
+        if (!isEditingCalc()) {
+          fillDDCalc();
+          fillPMCalc();
+        }
+      } else {
+        setStatus(false, null, "prices.js 数据格式错误");
+      }
+      countdown = 60;
+      updateCountdown();
+    };
+    
+    script.onerror = function() {
+      setStatus(false, null, "未找到 prices.js，请先运行 auto_update.py");
+      countdown = 60;
+      updateCountdown();
+    };
+    
+    document.body.appendChild(script);
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", loadPrices);
+  document.getElementById("dd-select").addEventListener("change", fillDDCalc);
+  document.getElementById("pm-select").addEventListener("change", fillPMCalc);
+  ["dd-high", "dd-current", "dd-ytd-base"].forEach(id => document.getElementById(id).addEventListener("input", calcDrawdownAndYTD));
+  ["pm-price", "pm-iopv"].forEach(id => document.getElementById(id).addEventListener("input", calcPremium));
+
+  loadPrices();
+  setInterval(() => {
+    countdown--;
+    if (countdown <= 0) { loadPrices(); } else { updateCountdown(); }
+  }, 1000);
+</script>
+</body>
+</html>
