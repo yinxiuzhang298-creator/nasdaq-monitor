@@ -182,13 +182,3 @@ def update_json():
         
     print(f"[{now_str}] 本地数据同步成功！\n")
 
-if __name__ == "__main__":
-    # 本地运行时，循环执行
-    while True:
-        try:
-            update_json()
-        except Exception as e:
-            print(f"发生未知全局错误: {e}")
-        
-        print("等待 5 分钟后进行下一次自动更新...\n")
-        time.sleep(300)
