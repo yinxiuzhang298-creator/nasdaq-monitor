@@ -181,4 +181,5 @@ def update_json():
         f.write("window.LATEST_PRICES = " + json_str + ";")
         
     print(f"[{now_str}] 本地数据同步成功！\n")
-
+# 直接顶格调用，没有任何 if 判断
+update_json()
