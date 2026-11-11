@@ -2,13 +2,15 @@ name: Auto Update Prices
 
 on:
   schedule:
-    # 每 15 分钟运行一次 (GitHub 免费版的最短合理间隔)
-    - cron: '*/10 * * * *'
-  workflow_dispatch: # 允许你在网页上手动点击运行
+    # 每 15 分钟运行一次
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # 授予写入权限
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,6 +20,9 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install dependencies
+        run: pip install yfinance
+
       - name: Run update script
         run: python auto_update.py
 
@@ -26,7 +31,4 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add prices.js prices.json
-          # 如果有更新才提交，没有就跳过
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update prices" && git push)
-# force active
-pip install yfinance
