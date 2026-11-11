@@ -1,10 +1,10 @@
 import json
 import urllib.request
-from datetime import datetime, timezone, timedelta
 import time
+from datetime import datetime, timezone, timedelta
 
 def get_qqq_yahoo():
-    """直接请求雅虎 V8 图表 API，获取盘前/盘后数据，比 yfinance 更原生"""
+    """直接请求雅虎 V8 图表 API，获取盘前/盘后数据，比 yfinance 更原生且防封"""
     # 带上盘前盘后参数 includePrePost=true
     url = "https://query1.finance.yahoo.com/v8/finance/chart/QQQ?interval=1m&range=1d&includePrePost=true"
     headers = {
@@ -47,7 +47,7 @@ def get_other_us_data():
     url = f"https://hq.sinajs.cn/list={symbols}"
     req = urllib.request.Request(url)
     req.add_header("Referer", "https://finance.sina.com.cn")
-    req.add_header("User-Agent", "Mozilla/5.0")
+    req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
     
     results = {"nq": 28000.0, "nq_pct": 0.0, "vix": 19.42, "vix_pct": 0.0}
     
@@ -68,6 +68,7 @@ def get_other_us_data():
             
             if code_part == "nq" and len(data) > 8:
                 price = safe_float(data[0], 28000.0)
+                # 新浪期货的昨收经常为空，依次尝试昨收、昨结、今开
                 pre_close = safe_float(data[1], 0.0) or safe_float(data[7], 0.0) or safe_float(data[8], price)
                 pct = ((price - pre_close) / pre_close) * 100 if pre_close > 0 else 0.0
                 results["nq"] = round(price, 2)
@@ -82,7 +83,7 @@ def get_other_us_data():
     return results
 
 def get_cn_etf_data():
-    print("正在获取国内 ETF 数据...")
+    print("正在获取国内 ETF 数据（腾讯接口）...")
     etfs = ["159501", "159659", "159696"]
     codes = ",".join([f"sz{code}" for code in etfs])
     url = f"https://qt.gtimg.cn/q={codes}"
@@ -104,26 +105,26 @@ def get_cn_etf_data():
                 iopv = float(fields[78]) if fields[78] else None
                 change_pct = float(fields[32]) if fields[32] else 0.0
                 cn_data[code] = {"price": price, "iopv": iopv, "changePct": round(change_pct, 2)}
-                print(f"  {code}: {price} ({change_pct}%)")
+                print(f"  {code}: 价格 {price}, 涨跌幅 {change_pct}%, IOPV {iopv}")
     except Exception as e:
         print(f"  获取国内 ETF 失败: {e}")
     return cn_data
 
 def update_json():
+    # 1. 抓取三大板块数据
     other_us = get_other_us_data()
     cn_data = get_cn_etf_data()
-    
-    # 获取 QQQ（雅虎）
     q_price, q_prev, q_pct, q_session = get_qqq_yahoo()
     
-    # 如果雅虎彻底废了（比如被墙），用 NQ 期货兜底模拟
+    # 2. QQQ 兜底逻辑：如果雅虎被封，利用 NQ 期货模拟
     if q_price is None:
         print("  [兜底] 雅虎接口超时，使用 NQ 期货模拟 QQQ")
-        q_prev = 679.35  # 假设的昨晚收盘价
+        q_prev = 679.35  # 假设的最近收盘价（可根据需要写死）
         q_pct = other_us["nq_pct"]
         q_price = q_prev * (1 + q_pct / 100)
         q_session = "模拟盘前"
     
+    # 3. 组装 JSON
     tz_bj = timezone(timedelta(hours=8))
     now_str = datetime.now(tz_bj).strftime("%Y-%m-%dT%H:%M:%S+08:00")
     
@@ -134,7 +135,7 @@ def update_json():
                 "id": "qqq", "label": "QQQ · 纳斯达克100 ETF",
                 "currency": "$", "decimals": 2,
                 "price": round(q_price, 2), "changePct": round(q_pct, 2),
-                "close_price": round(q_prev, 2), "close_pct": 3.54,
+                "close_price": round(q_prev, 2), "close_pct": 3.54, # 注意：这里的 close_pct 因为雅虎未直接提供昨收涨幅，作为静态兜底
                 "session": q_session,
                 "high": 759.66, "highLabel": "历史收盘高点", "highDate": "",
                 "ytdBase": 614.00, "iopv": None, "asOf": "实时", "note": ""
@@ -172,18 +173,22 @@ def update_json():
         ]
     }
     
+    # 4. 写入文件
     json_str = json.dumps(json_data, ensure_ascii=False, indent=2)
     with open("prices.json", "w", encoding="utf-8") as f:
         f.write(json_str)
     with open("prices.js", "w", encoding="utf-8") as f:
         f.write("window.LATEST_PRICES = " + json_str + ";")
+        
     print(f"[{now_str}] 本地数据同步成功！\n")
 
 if __name__ == "__main__":
-    import time
-    update_json()
-    # 恢复本地循环，每 5 分钟跑一次
+    # 本地运行时，循环执行
     while True:
-        print("等待 5 分钟后进行下一次更新...\n")
+        try:
+            update_json()
+        except Exception as e:
+            print(f"发生未知全局错误: {e}")
+        
+        print("等待 5 分钟后进行下一次自动更新...\n")
         time.sleep(300)
-        update_json()
