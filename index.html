@@ -208,25 +208,34 @@
       const lines = [];
       let row1 = "";
       
-      // ★ 针对 QQQ 专属渲染逻辑
+          // ★ 针对 QQQ 专属渲染逻辑
       if (a.id === "qqq") {
-        // 防止数据缺失引发 NaN/undefined
         const session = a.session || "收盘"; 
         const c_price = a.close_price || a.price || 0;
         const c_pct = a.close_pct || 0;
         
-        const isClosed = session === "收盘";
-        const priceLabel = isClosed ? "收盘价" : session + "实时";
-        const sourceLabel = session === "模拟盘前" ? "(期货估算)" : (isClosed ? "(yfinance)" : "(盘前/盘后)");
+        // 智能识别标签
+        let labelText = "实时价";
+        if (session === "收盘") labelText = "收盘价";
+        else if (session === "盘前" || session === "模拟盘前") labelText = "盘前价";
+        else if (session === "盘后") labelText = "盘后价";
         
-        lines.push(`<span style="color:#f0f6fc;font-weight:600;">${priceLabel}</span> ${sourceLabel}`);
+        const sourceLabel = session === "模拟盘前" ? "(期货估算)" : (session === "收盘" ? "(yfinance)" : "(实时)");
+        
+        lines.push(`<span style="color:#f0f6fc;font-weight:600;">${labelText}</span> ${sourceLabel}`);
         lines.push(`昨晚收盘 $${Number(c_price).toFixed(2)} (${fmtPct(c_pct, true)})`);
         lines.push(`历史高点 $${Number(a.high || 759.66).toFixed(2)}`);
         
-        if (!isClosed && a.changePct !== null && a.changePct !== undefined) {
+        // 只要有涨跌幅，就显示出来（不再管是不是收盘）
+        if (a.changePct !== null && a.changePct !== undefined) {
           const pct = Number(a.changePct);
           const cls = pct > 0 ? "ytd-positive" : (pct < 0 ? "ytd-negative" : "premium-na");
-          row1 += `<span class="badge ${cls}">${session} ${fmtPct(pct, true)}</span>`;
+          
+          let badgeLabel = "今日";
+          if (session === "盘前" || session === "模拟盘前") badgeLabel = "盘前";
+          else if (session === "盘后") badgeLabel = "盘后";
+          
+          row1 += `<span class="badge ${cls}">${badgeLabel} ${fmtPct(pct, true)}</span>`;
         }
         
         if (c.drawdown !== null) {
