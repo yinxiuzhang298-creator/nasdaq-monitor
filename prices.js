@@ -1,89 +1,98 @@
 window.LATEST_PRICES = {
-  "updated": "2026-11-10T17:33:15+08:00",
+  "updated": "2026-11-11T10:38:45+08:00",
   "assets": [
     {
       "id": "qqq",
       "label": "QQQ · 纳斯达克100 ETF",
       "currency": "$",
       "decimals": 2,
-      "price": 679.35,
+      "price": 679.24,
+      "changePct": -0.02,
+      "close_price": 679.35,
+      "close_pct": 3.54,
+      "session": "收盘",
       "high": 759.66,
       "highLabel": "历史收盘高点",
       "highDate": "",
       "ytdBase": 614.0,
       "iopv": null,
-      "asOf": "实时 (新浪)",
-      "changePct": 3.54
+      "asOf": "实时",
+      "note": ""
     },
     {
       "id": "nq",
       "label": "NQ 期货 · 纳指100",
       "currency": "",
       "decimals": 2,
-      "price": 28007.97,
+      "price": 28101.38,
+      "changePct": 0.96,
       "high": null,
       "highLabel": "",
       "highDate": "",
       "ytdBase": null,
       "iopv": null,
       "asOf": "实时 (新浪)",
-      "changePct": -0.02
+      "note": ""
     },
     {
       "id": "vix",
       "label": "VIX · 恐慌指数",
       "currency": "",
       "decimals": 2,
-      "price": 19.88,
+      "price": 19.45,
+      "changePct": -2.41,
       "high": null,
       "highLabel": "",
       "highDate": "",
       "ytdBase": null,
       "iopv": null,
       "asOf": "实时 (新浪)",
-      "changePct": -0.25
+      "note": ""
     },
     {
       "id": "159501",
       "label": "159501 · 嘉实纳指ETF",
       "currency": "¥",
       "decimals": 3,
-      "price": 2.11,
+      "price": 2.107,
+      "changePct": -0.14,
       "high": 2.255,
       "highLabel": "10月高点",
       "highDate": "",
       "ytdBase": 1.799,
-      "iopv": 1.7541,
+      "iopv": 1.7431,
       "asOf": "实时 (腾讯)",
-      "changePct": 2.68
+      "note": ""
     },
     {
       "id": "159659",
       "label": "159659 · 招商纳指ETF",
       "currency": "¥",
       "decimals": 3,
-      "price": 2.344,
+      "price": 2.342,
+      "changePct": -0.09,
       "high": 2.529,
       "highLabel": "修正高点",
       "highDate": "2026-10-12",
       "ytdBase": 1.92,
-      "iopv": 2.0191,
+      "iopv": 2.0061,
       "asOf": "实时 (腾讯)",
-      "changePct": 3.81
+      "note": ""
     },
     {
       "id": "159696",
       "label": "159696 · 易方达纳指ETF",
       "currency": "¥",
       "decimals": 3,
-      "price": 2.049,
+      "price": 2.053,
+      "changePct": 0.2,
       "high": 2.26,
       "highLabel": "10月高点",
       "highDate": "",
       "ytdBase": 1.692,
-      "iopv": 1.7391,
+      "iopv": 1.7282,
       "asOf": "实时 (腾讯)",
-      "changePct": 3.54
+      "note": ""
     }
   ]
 };
