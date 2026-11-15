@@ -1,5 +1,5 @@
 window.LATEST_PRICES = {
-  "updated": "2026-11-15T17:56:05+08:00",
+  "updated": "2026-11-16T00:46:19+08:00",
   "assets": [
     {
       "id": "qqq",
