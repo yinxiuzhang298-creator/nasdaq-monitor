@@ -1,5 +1,5 @@
 window.LATEST_PRICES = {
-  "updated": "2026-11-16T05:26:25+08:00",
+  "updated": "2026-11-16T09:17:04+08:00",
   "assets": [
     {
       "id": "qqq",
@@ -24,8 +24,8 @@ window.LATEST_PRICES = {
       "label": "NQ 期货 · 纳指100",
       "currency": "",
       "decimals": 2,
-      "price": 27906.37,
-      "changePct": -1.68,
+      "price": 27958.25,
+      "changePct": -0.27,
       "high": null,
       "highLabel": "",
       "highDate": "",
@@ -60,7 +60,7 @@ window.LATEST_PRICES = {
       "highLabel": "10月高点",
       "highDate": "",
       "ytdBase": 1.799,
-      "iopv": 1.7777,
+      "iopv": 1.7555,
       "asOf": "实时 (腾讯)",
       "note": ""
     },
@@ -70,12 +70,12 @@ window.LATEST_PRICES = {
       "currency": "¥",
       "decimals": 3,
       "price": 2.376,
-      "changePct": 0.55,
+      "changePct": 0.0,
       "high": 2.529,
       "highLabel": "修正高点",
       "highDate": "2026-10-12",
       "ytdBase": 1.92,
-      "iopv": 2.0459,
+      "iopv": 2.0204,
       "asOf": "实时 (腾讯)",
       "note": ""
     },
@@ -85,12 +85,12 @@ window.LATEST_PRICES = {
       "currency": "¥",
       "decimals": 3,
       "price": 2.073,
-      "changePct": 0.73,
+      "changePct": 0.0,
       "high": 2.26,
       "highLabel": "10月高点",
       "highDate": "",
       "ytdBase": 1.692,
-      "iopv": 1.7624,
+      "iopv": 1.7405,
       "asOf": "实时 (腾讯)",
       "note": ""
     }
