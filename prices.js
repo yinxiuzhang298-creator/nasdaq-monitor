@@ -1,13 +1,13 @@
 window.LATEST_PRICES = {
-  "updated": "2026-11-23T01:49:08+08:00",
+  "updated": "2026-11-23T07:05:44+08:00",
   "assets": [
     {
       "id": "nq",
       "label": "NQ 期货 · 纳指100",
       "currency": "",
       "decimals": 2,
-      "price": 25262.69,
-      "changePct": -5.03,
+      "price": 25574.03,
+      "changePct": 1.78,
       "high": null,
       "highLabel": "",
       "highDate": "",
