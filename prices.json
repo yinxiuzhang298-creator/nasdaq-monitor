@@ -1,13 +1,13 @@
 {
-  "updated": "2026-11-26T23:09:04+08:00",
+  "updated": "2026-11-27T07:48:56+08:00",
   "assets": [
     {
       "id": "nq",
       "label": "NQ 期货 · 纳指100",
       "currency": "",
       "decimals": 2,
-      "price": 26281.14,
-      "changePct": 0.69,
+      "price": 26252.86,
+      "changePct": 0.58,
       "high": null,
       "highLabel": "",
       "highDate": "",
